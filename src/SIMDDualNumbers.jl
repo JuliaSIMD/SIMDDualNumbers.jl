@@ -1,8 +1,8 @@
 module SIMDDualNumbers
 
 using VectorizationBase, SLEEFPirates, ForwardDiff
-using VectorizationBase: AbstractSIMD
-using IfElse: ifelse
+using VectorizationBase: AbstractSIMD, AbstractMask
+import IfElse: ifelse
 
 @generated function Base.abs(x::ForwardDiff.Dual{TAG,S,N}) where {TAG,S<:AbstractSIMD,N}
   quote
@@ -78,5 +78,33 @@ end
   end
 end
 
+@generated function ifelse(m::AbstractMask, x::ForwardDiff.Dual{TAG,V,P}, y::ForwardDiff.Dual{TAG,V,P}) where {TAG,V,P}
+  quote
+    $(Expr(:meta,:inline))
+    z = $ifelse(m, ForwardDiff.value(x), ForwardDiff.value(y))
+    px = ForwardDiff.partials(x)
+    py = ForwardDiff.partials(y)
+    p = Base.Cartesian.@ntuple $P p -> $ifelse(m, px[p], py[p])
+    ForwardDiff.Dual{$TAG}(z, ForwardDiff.Partials(p))
+  end
+end
+@generated function ifelse(m::AbstractMask, x::Number, y::ForwardDiff.Dual{TAG,V,P}) where {TAG,V,P}
+  quote
+    $(Expr(:meta,:inline))
+    z = $ifelse(m, x, ForwardDiff.value(y))
+    py = ForwardDiff.partials(y)
+    p = Base.Cartesian.@ntuple $P p -> $ifelse(m, zero($V), py[p])
+    ForwardDiff.Dual{$TAG}(z, ForwardDiff.Partials(p))
+  end
+end
+@generated function ifelse(m::AbstractMask, x::ForwardDiff.Dual{TAG,V,P}, y::Number) where {TAG,V,P}
+  quote
+    $(Expr(:meta,:inline))
+    z = $ifelse(m, ForwardDiff.value(x), y)
+    px = ForwardDiff.partials(x)
+    p = Base.Cartesian.@ntuple $P p -> $ifelse(m, px[p], zero($V))
+    ForwardDiff.Dual{$TAG}(z, ForwardDiff.Partials(p))
+  end
+end
 
 end

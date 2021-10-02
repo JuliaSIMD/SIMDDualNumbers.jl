@@ -10,6 +10,13 @@ function toaos(d::ForwardDiff.Dual{TAG,Vec{W,T},P}) where {TAG,W,T,P}
   end
 end
 
+function test(ref, vanswer)
+  answer = toaos(vanswer)
+  for i ∈ eachindex(ref)
+    @test ref[i] ≈ answer[i]
+  end  
+end
+
 @testset "SIMDDualNumbers.jl" begin
   
   dx = ForwardDiff.Dual(
@@ -26,20 +33,19 @@ end
   dxaos = toaos(dx)
   dyaos = toaos(dy)
   for uf ∈ [SIMDDualNumbers.tanh_fast, SIMDDualNumbers.sigmoid_fast, abs, VectorizationBase.relu]
-    ref = map(uf, dxaos)
-    answer = toaos(uf(dx))
-    for i ∈ eachindex(ref)
-      @test ref[i] ≈ answer[i]
-    end
+    test(map(uf, dxaos), uf(dx))
   end
   for bf ∈ [max, min]
-    ref = map(bf, dxaos, dyaos)
-    answer = toaos(bf(dx, dy))
-    for i ∈ eachindex(ref)
-      @test ref[i] ≈ answer[i]
-    end
+    test(map(bf, dxaos, dyaos), bf(dx, dy))
   end
 
+  vz = Vec(ntuple(_ -> rand(), VectorizationBase.pick_vector_width(Float64))...)
+  tz = Tuple(vz)
+  cmp = dx > dy
+  cmpaos = dxaos .> dyaos
+  test(map(ifelse, cmpaos, dxaos, dyaos), SIMDDualNumbers.ifelse(cmp, dx, dy))
+  test(map(ifelse, cmpaos, tz, dyaos), SIMDDualNumbers.ifelse(cmp, vz, dy))
+  test(map(ifelse, cmpaos, dxaos, tz), SIMDDualNumbers.ifelse(cmp, dx, vz))
   
   Aqua.test_all(SIMDDualNumbers, ambiguities=false) #TODO: test ambiguities once ForwardDiff fixes them, or once ForwardDiff is dropped
 end
