@@ -3,11 +3,24 @@ uuid = "3cdde19b-5bb0-4aaf-8931-af3e248e098b"
 authors = ["Chris Elrod <elrodc@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+IfElse = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
+SLEEFPirates = "476501e8-09a2-5ece-8869-fb82de89a1fa"
+VectorizationBase = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
+
 [compat]
-julia = "1"
+ForwardDiff = "0.10"
+IfElse = "0.1.0"
+SLEEFPirates = "0.6"
+VectorizationBase = "0.21"
+julia = "1.5"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+VectorizationBase = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
 
 [targets]
-test = ["Test"]
+test = ["Aqua", "ForwardDiff", "Test"]
