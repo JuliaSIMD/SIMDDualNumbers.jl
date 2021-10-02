@@ -4,7 +4,7 @@ CurrentModule = SIMDDualNumbers
 
 # SIMDDualNumbers
 
-Documentation for [SIMDDualNumbers](https://github.com/chriselrod/SIMDDualNumbers.jl).
+Documentation for [SIMDDualNumbers](https://github.com/JuliaSIMD/SIMDDualNumbers.jl).
 
 ```@index
 ```
