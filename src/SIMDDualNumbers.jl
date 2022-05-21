@@ -106,5 +106,12 @@ end
     ForwardDiff.Dual{$TAG}(z, ForwardDiff.Partials(p))
   end
 end
+@inline function SLEEFPirates.softplus(x::ForwardDiff.Dual{TAG}) where {TAG}
+  val = ForwardDiff.value(x)
+  expx = exp(val)
+  vx = log1p(expx)
+  px = Base.FastMath.inv_fast(one(val) + Base.FastMath.inv_fast(expx))
+  ForwardDiff.Dual{TAG}(vx, Base.FastMath.mul_fast(ForwardDiff.partials(x),px))
+end
 
 end
